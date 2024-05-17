@@ -1,0 +1,21 @@
+.root {
+    height: "100vh"
+}
+  
+.ms-welcome__header {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+}
+  
+.ms-welcome__main {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+  
+.ms-welcome__action {
+    margin: 10px 0;
+    cursor: pointer;
+}
+  
