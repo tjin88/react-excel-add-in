@@ -16,6 +16,7 @@ import {
 } from "./helpers/functions";
 import { initializeOffice } from "./helpers/eventHandlers";
 // import TextInsertion from "./components/TextInsertion";
+import TaskPane from "./components/TaskPaneChild";
 import "./App.css";
 
 const App = () => {
@@ -87,6 +88,7 @@ const App = () => {
       </header>
       <main id="app-body" className="ms-welcome__main">
         {/* <Button id="backgroundWhite" label="Background White" onClick={backgroundWhite} /> */}
+        <TaskPane />
         <Button id="clearMessage" label="Clear Message" onClick={clearMessage} />
         <Button id="validate" label="Validate" onClick={validate} />
         {/* <Button id="hideRows" label="Hide Rows" onClick={hideRows} /> */}
