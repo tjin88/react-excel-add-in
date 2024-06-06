@@ -2,7 +2,7 @@
 import React from "react";
 import { useState } from "react";
 import { Button, Field, Textarea, tokens, makeStyles } from "@fluentui/react-components";
-import insertText from "../subcomponents/office-document";
+import insertText from "../office-document";
 
 const useStyles = makeStyles({
   instructions: {

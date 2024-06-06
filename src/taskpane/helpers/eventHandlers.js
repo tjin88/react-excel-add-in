@@ -22,9 +22,7 @@ const loadScript = (src) => {
 export async function handleCellChange(event) {
   try {
     await Excel.run(async (context) => {
-      document.getElementById("message").innerText += `handleCellChange called!.\n`;
-      const sheet = context.workbook.worksheets.getItem("Questionaire");
-      document.getElementById("message").innerText += `handleCellChange called!.\n`;
+      const sheet = context.workbook.worksheets.getActiveWorksheet();
 
       // Unprotect the sheet to make changes
       sheet.protection.unprotect();
