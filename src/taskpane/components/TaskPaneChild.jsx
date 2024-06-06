@@ -2,8 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import insertText from "../office-document";
-import { Button, Field, Textarea, tokens, makeStyles } from "@fluentui/react-components";
-import "./TaskPaneChild.css";
+import { tokens, makeStyles } from "@fluentui/react-components";
 
 const useStyles = makeStyles({
   instructions: {
