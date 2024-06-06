@@ -222,6 +222,88 @@ export async function questionaire(questions) {
   }
 }
 
+// Create a "Questionaire_v2" sheet with questions for borrower
+// This function currently encounters errors if there is an existing sheet called "Questionaire_v2"
+export async function questionaire_v2(questions) {
+  try {
+    await Excel.run(async (context) => {
+      const sheet = context.workbook.worksheets.add("Questionaire_v2");
+
+      // Make the entire sheet white
+      const entireRange = sheet.getRange("A1:ZZ1000");
+      entireRange.format.fill.color = "white";
+
+      // Table Header
+      const headerRange = sheet.getRange("B2:E2");
+      headerRange.values = [["Num", "Question", "Method", "Answer"]];
+      headerRange.format.font.bold = true;
+
+      // Add the questions to table, excluding the last element (used for Hidden/Visible row)
+      const slicedQuestions = questions.map((q) => q.slice(0, -2));
+      const questionsRange = sheet.getRange(`B3:E${3 + slicedQuestions.length - 1}`);
+      questionsRange.values = slicedQuestions;
+
+      // Add border around the table --> B2:E2 = header, B3:E${3 + slicedQuestions.length - 1} = questions
+      const tableRange = sheet.getRange(`B2:E${3 + slicedQuestions.length - 1}`);
+
+      // Set the borders for the table range
+      const borderItems = [
+        Excel.BorderIndex.edgeTop,
+        Excel.BorderIndex.edgeBottom,
+        Excel.BorderIndex.edgeLeft,
+        Excel.BorderIndex.edgeRight,
+      ];
+
+      borderItems.forEach((borderItem) => {
+        const border = tableRange.format.borders.getItem(borderItem);
+        border.style = Excel.BorderLineStyle.thin;
+        border.color = "black";
+      });
+
+      // Adjust column widths
+      sheet.getRange("B:D").getEntireColumn().format.autofitColumns();
+      sheet.getRange("E:E").getEntireColumn().format.columnWidth = 500;
+
+      const range = sheet.getRange("D:D");
+      range.columnHidden = true;
+
+      // Left justify all values in column E (numbers get sent to the right by default)
+      const columnERange = sheet.getRange("E:E");
+      columnERange.format.horizontalAlignment = Excel.HorizontalAlignment.left;
+
+      // Make the table headers (B2:E2), and questions (B3:D{3 + question length}) read-only
+      sheet.getUsedRange().format.protection.locked = false;
+      const lockedHeaders = sheet.getRange(`B2:E2`);
+      lockedHeaders.format.protection.locked = true;
+      const lockedQuestions = sheet.getRange(`B3:D${3 + slicedQuestions.length - 1}`);
+      lockedQuestions.format.protection.locked = true;
+      sheet.protection.protect();
+
+      await context.sync();
+
+      // Hide rows with "Hidden" in the last element of each question array
+      for (let i = 0; i < questions.length; i++) {
+        const lastValue = questions[i][questions[i].length - 1];
+        if (lastValue === "Hidden") {
+          const rowIndex = i + 3; // Adjust for the header row and 0-based index
+          const rowRange = sheet.getRange(`${rowIndex}:${rowIndex}`);
+          rowRange.rowHidden = true;
+        }
+      }
+      await context.sync();
+
+      // Add event listener for changes in the "Questionaire" sheet
+      sheet.onChanged.add(handleCellChange);
+      await context.sync();
+
+      document.getElementById("message").innerText += `Questionaire sheet created and event listener added.\n`;
+    });
+  } catch (error) {
+    console.error(error);
+    document.getElementById("message").innerText += `Error: ${error.message}\n`;
+  }
+}
+
 // Create a "Report" sheet with columns to fill for borrower
 // This function currently encounters errors if there is an existing sheet called "Report"
 export async function report(fields) {
@@ -242,35 +324,6 @@ export async function report(fields) {
 
       // Adjust column widths
       sheet.getRange("A:A").getEntireColumn().format.autofitColumns();
-
-      // // Apply formatting
-      // fields.forEach((field, index) => {
-      //   const cell = sheet.getRange(`B${index + 2}`);
-      //   const value = field[1].trim();
-
-      //   document.getElementById("message").innerText += `Cell: ${cell}, value: ${value}.\n`;
-
-      //   if (value.startsWith("$")) {
-      //     // Apply dollar formatting
-      //     const numericValue = parseFloat(value.replace("$", "").replace(",", ""));
-      //     cell.values = [[numericValue]];
-      //     cell.numberFormat = [["$#,##0.00"]];
-      //     cell.format.horizontalAlignment = Excel.HorizontalAlignment.right;
-      //     cell.format.numberFormatLocal = "[$$-409]#,##0.00"; // Custom format with dollar sign
-      //   } else if (value === "-") {
-      //     cell.values = [[value]];
-      //     cell.format.horizontalAlignment = "center";
-      //   }
-      // });
-
-      // // Make the table headers (B2:E2), and questions (B3:D{3 + question length}) read-only
-      // sheet.getUsedRange().format.protection.locked = false;
-      // const lockedHeaders = sheet.getRange(`B2:E2`);
-      // lockedHeaders.format.protection.locked = true;
-      // const lockedQuestions = sheet.getRange(`B3:D${3 + slicedQuestions.length - 1}`);
-      // lockedQuestions.format.protection.locked = true;
-      // sheet.protection.protect();
-
       await context.sync();
 
       // // Add event listener for changes in the "Report" sheet

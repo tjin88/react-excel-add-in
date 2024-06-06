@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // eslint-disable-next-line no-redeclare
 /* global Office */
 
@@ -11,6 +12,7 @@ import {
   unhideRows,
   clearMessage,
   questionaire,
+  questionaire_v2,
   deleteSheet,
   report,
 } from "./helpers/functions";
@@ -34,8 +36,7 @@ const App = () => {
   }, []);
 
   /**
-   * Will be changed to an API call to get the questions and slugs from FlowPoint.
-   * Until then, the setQuestions funciton willl be unused
+   * Old model (v1)
    *
    * Format: [Order, Question, Method, Answer, Hidden/Visible, Slug]
    * Order: Number. Can have one or more follow-up questions
@@ -60,6 +61,31 @@ const App = () => {
     ["7.1", "Why not?", "String", "", "Hidden", "legal-obl-reason"],
     ["8", "What was your growth in your MRR (%)", "Num", "", "", "mrr-growth"],
   ]);
+
+  /**
+   * Currently updating this (v2)
+   * 
+   * Format: key = slug, value = [Question num, Question, Answer, Validation]
+   * Question num: Number. Can have one or more follow-up questions
+   * Question: Just a string
+   * Answer: Flowpoint will either provide a pre-filled answer OR an empty string
+   * Validation: JSON string containing FlowPoint's DSL
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [flowpointQuestions, setFlowpointQuestions] = useState({
+    "slug1": ["1", "How much exposure do you have to the US and Canada (%)", "", "Some DSL Here"],
+    "slug2": ["2", "Have you had any board meetings in the past month (Yes/No)", "", "Some DSL Here"],
+    "slug3": ["2.1", "What was the purpose of the board meeting?", "", "Some DSL Here"],
+    "slug4": ["3", "Are you following all legal obligations (Yes/No)", "", "Some DSL Here"],
+    "slug5": ["3.1", "Why not?", "", "Some DSL Here"],
+    "slug6": ["4", "What was your growth in your MRR (%)", "", "Some DSL Here"],
+    "slug7": ["5", "How much exposure do you have to the US and Canada (%)", "50", "Some DSL Here"],
+    "slug8": ["6", "Have you had any board meetings in the past month (Yes/No)", "Yes", "Some DSL Here"],
+    "slug9": ["6.1", "What was the purpose of the board meeting?", "Some reason", "Some DSL Here"],
+    "slug10": ["7", "Are you following all legal obligations (Yes/No)", "Yes", "Some DSL Here"],
+    "slug11": ["7.1", "Why not?", "N/A", "Some DSL Here"],
+    "slug12": ["8", "What was your growth in your MRR (%)", "12345", "Some DSL Here"],
+  });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [fields, setFields] = useState([
@@ -95,6 +121,8 @@ const App = () => {
         <Button id="unhideRows" label="Unhide Rows" onClick={unhideRows} />
         <Button id="questionaire" label="Questionaire" onClick={() => questionaire(questions)} />
         <Button id="deleteQuestionaire" label="Delete Questionaire Sheet" onClick={() => deleteSheet("Questionaire")} />
+        <Button id="questionaire" label="Questionaire v2" onClick={() => questionaire_v2(questions)} />
+        <Button id="deleteQuestionaire" label="Delete Questionaire v2 Sheet" onClick={() => deleteSheet("Questionaire_v2")} />
         <Button id="report" label="Report" onClick={() => report(fields)} />
         <Button id="deleteReport" label="Delete Report Sheet" onClick={() => deleteSheet("Report")} />
         <Message />

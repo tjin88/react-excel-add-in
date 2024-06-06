@@ -8,8 +8,8 @@ const path = require("path");
 require("dotenv").config();
 
 // Path to SSL certificate and key files
-const keyPath = path.join(__dirname, "server.key");
-const certPath = path.join(__dirname, "server.crt");
+const keyPath = path.join(__dirname, "..", "server.key");
+const certPath = path.join(__dirname, "..", "server.crt");
 
 // Read the SSL certificate and key
 const privateKey = fs.readFileSync(keyPath, "utf8");
@@ -21,6 +21,10 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const port = process.env.PORT || 3001;
+
+app.get("/", (req, res) => {
+  res.send("Server up and running!");
+});
 
 app.post("/gpt-api", async (req, res) => {
   /*

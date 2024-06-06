@@ -1,4 +1,6 @@
 # Please place the server certificate in this folder ***
+**Server certificate is required for the server to run**
+**You must also create a .env file containing an OpenAI api key**
 
 # Implementing API Calls on the Excel Add-in
 

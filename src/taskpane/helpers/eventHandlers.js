@@ -1,10 +1,20 @@
 // eslint-disable-next-line no-redeclare, @typescript-eslint/no-unused-vars
 /* global document, Excel, Office */
-
 import { checkIsValid } from "./functions";
 
 export const initializeOffice = () => {
   document.getElementById("app-body").style.display = "flex";
+};
+
+// Load any script from a CDN
+const loadScript = (src) => {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
 };
 
 // Event handler for cell changes
@@ -82,6 +92,35 @@ export async function handleCellChange(event) {
         // Left justify all values (numbers get sent to the right by default)
         changedRange.format.horizontalAlignment = Excel.HorizontalAlignment.left;
       }
+
+      // Testing jQuery (to see if any CDN script can be run in the onChange function)
+      loadScript("https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js")
+        .then(() => {
+          console.log("script loaded!");
+          // simple jQuery test
+          const all_colours = [
+            "lightblue",
+            "lightgreen",
+            "lightyellow",
+            "lightcoral",
+            "lightcyan",
+            "lightgoldenrodyellow",
+            "lightgray",
+            "lightpink",
+            "lightsalmon",
+            "lightseagreen",
+            "lightskyblue",
+            "lightslategray",
+            "lightsteelblue",
+            "lightyellow",
+          ];
+          const colour = all_colours[Math.floor(Math.random() * (all_colours.length - 1))];
+          window.$(".ms-welcome").css("background-color", colour);
+          window.$("body").css("background-color", colour);
+        })
+        .catch((error) => {
+          console.error("Failed to load the jQuery script:", error);
+        });
 
       await context.sync();
       // Protect the sheet again
