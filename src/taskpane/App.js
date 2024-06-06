@@ -14,7 +14,6 @@ import {
   questionaire,
   questionaire_v2,
   deleteSheet,
-  report,
 } from "./helpers/functions";
 import { initializeOffice } from "./helpers/eventHandlers";
 // import TextInsertion from "./components/TextInsertion";
@@ -87,26 +86,6 @@ const App = () => {
     "slug12": ["8", "What was your growth in your MRR (%)", "12345", "Some DSL Here"],
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [fields, setFields] = useState([
-    ["Net Sales", "$30000"],
-    ["Total Cost of Goods Sold", "$5000"],
-    ["Gross Profit", "$25000"],
-    ["Total Operating Expenses", "$10000"],
-    ["Operating Profit (Loss)", "$15000"],
-    ["Interest Income", "-"],
-    ["Other Income", "$1000"],
-    ["Profit (Loss) Before Taxes", "$16000"],
-    ["Income Tax Expense", "$4800"],
-    ["Net Profit (Loss)", "$11200"],
-    ["How much exposure do you have to the US and Canada (%)", "25%"],
-    ["Have you had any board meetings in the past month (Yes/No)", "Yes"],
-    ["What was the purpose of the board meeting?", "Reason"],
-    ["Are you following all legal obligations (Yes/No)", "Yes"],
-    ["Why not?", "-"],
-    ["What was your growth in your MRR (%)", "0%"],
-  ]);
-
   return (
     <div className="ms-Fabric ms-font-m ms-welcome">
       <header className="ms-welcome__header ms-bgColor-neutralLighter">
@@ -123,8 +102,6 @@ const App = () => {
         <Button id="deleteQuestionaire" label="Delete Questionaire Sheet" onClick={() => deleteSheet("Questionaire")} />
         <Button id="questionaire" label="Questionaire v2" onClick={() => questionaire_v2(questions)} />
         <Button id="deleteQuestionaire" label="Delete Questionaire v2 Sheet" onClick={() => deleteSheet("Questionaire_v2")} />
-        <Button id="report" label="Report" onClick={() => report(fields)} />
-        <Button id="deleteReport" label="Delete Report Sheet" onClick={() => deleteSheet("Report")} />
         <Message />
         {/* <TextInsertion /> */}
       </main>

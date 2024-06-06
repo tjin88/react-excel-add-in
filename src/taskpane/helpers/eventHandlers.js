@@ -19,6 +19,7 @@ const loadScript = (src) => {
 
 // Event handler for cell changes
 // TODO: Update handler to allow changedRange to be a range of cells rather than just one cell
+// TODO: Once Mark gives the go-ahead, remove the jQuery test and replace with his DSL
 export async function handleCellChange(event) {
   try {
     await Excel.run(async (context) => {
