@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import React, { useState } from "react";
 import axios from "axios";
-import insertText from "../office-document";
+// import insertText from "../office-document";
 import { tokens, makeStyles } from "@fluentui/react-components";
 
 const useStyles = makeStyles({
@@ -33,24 +33,75 @@ const TaskPane = () => {
   const [messages, setMessages] = useState([]);
   const styles = useStyles();
 
-  const callGPT = async () => {
+  const callTextboxGPT = async () => {
     try {
-      console.log("Calling GPT with prompt: " + prompt);
+      let rangeAddress;
+      let assistantResponse;
 
-      const updatedMessages = [...messages, { role: "user", content: prompt }];
+      await Excel.run(async (context) => {
+        const range = context.workbook.getSelectedRange();
+        range.load(["address", "values"]);
+        await context.sync();
 
-      const res = await axios.post("https://localhost:3001/gpt-api", {
-        messages: updatedMessages,
+        rangeAddress = range.address;
+
+        console.log("Calling GPT with prompt: " + prompt);
+        const updatedMessages = [...messages, { role: "user", content: prompt }];
+        const res = await axios.post("https://localhost:3001/gpt-api", {
+          messages: updatedMessages,
+        });
+        assistantResponse = res.data.choices[0].message.content;
+
+        const sheet = context.workbook.worksheets.getActiveWorksheet();
+        sheet.protection.unprotect();
+        const rangeToUpdate = sheet.getRange(rangeAddress).getCell(0, 0).getOffsetRange(0, 1);
+        rangeToUpdate.values = [[assistantResponse]];
+        rangeToUpdate.format.font.color = "black";
+        rangeToUpdate.format.autofitColumns();
+
+        setResponse(assistantResponse);
+        setMessages([...updatedMessages, { role: "assistant", content: assistantResponse }]);
+
+        sheet.protection.protect();
+        await context.sync();
       });
+    } catch (error) {
+      console.error("Error occurred while calling the server:", error);
+      setResponse("Error: " + error.toString());
+    }
+  };
 
-      const assistantResponse = res.data.choices[0].message.content;
+  const callActiveCellGPT = async () => {
+    try {
+      let assistantResponse;
 
-      setResponse(assistantResponse);
+      await Excel.run(async (context) => {
+        const range = context.workbook.getSelectedRange();
+        range.load(["address", "values"]);
+        await context.sync();
 
-      // Insert the assistant's response into the document (currently set to cell A1)
-      await insertText(assistantResponse, "A1");
+        const prompt = range.values[0][0];
 
-      setMessages([...updatedMessages, { role: "assistant", content: assistantResponse }]);
+        console.log("Calling GPT with prompt: " + prompt);
+        const updatedMessages = [...messages, { role: "user", content: prompt }];
+        const res = await axios.post("https://localhost:3001/gpt-api", {
+          messages: updatedMessages,
+        });
+        assistantResponse = res.data.choices[0].message.content;
+
+        const sheet = context.workbook.worksheets.getActiveWorksheet();
+        sheet.protection.unprotect();
+        const rangeToUpdate = sheet.getRange(range.address).getCell(0, 0).getOffsetRange(0, 1);
+        rangeToUpdate.values = [[assistantResponse]];
+        rangeToUpdate.format.font.color = "black";
+        rangeToUpdate.format.autofitColumns();
+
+        setResponse(assistantResponse);
+        setMessages([...updatedMessages, { role: "assistant", content: assistantResponse }]);
+
+        sheet.protection.protect();
+        await context.sync();
+      });
     } catch (error) {
       console.error("Error occurred while calling the server:", error);
       setResponse("Error: " + error.toString());
@@ -59,19 +110,20 @@ const TaskPane = () => {
 
   return (
     <div className={styles.textPromptAndInsertion}>
-      {/* <div className="gpt-integration"> */}
       <h1>GPT Integration</h1>
       <h3>Enter a prompt below and click the button to send it to GPT-4:</h3>
       <textarea
         className={styles.textAreaField}
-        // className="prompt-textarea"
         rows={4}
         cols={50}
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
       />
       <br />
-      <button onClick={callGPT}>Send to GPT</button>
+      <div>
+        <button onClick={callTextboxGPT}>Send to prompt from text box to GPT</button>
+        <button onClick={callActiveCellGPT}>Send to prompt from active cell to GPT</button>
+      </div>
       <div>{response}</div>
     </div>
   );

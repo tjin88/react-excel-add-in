@@ -57,7 +57,8 @@ app.post("/gpt-api", async (req, res) => {
           {
             role: "system",
             content:
-              "You are a helpful assistant knowledgeable in financial accounting. Please only respond with numbers and very short sentences (less than 5 words).",
+              // "You are a helpful assistant knowledgeable in financial accounting. Please only respond with numbers and very short sentences (less than 5 words).",
+              "You are an expert financial analyst. Use you knowledge base to answer questions about audited financial statements.",
           },
           ...messages,
         ],

@@ -7,6 +7,7 @@ const insertText = async (text, cell) => {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
       const range = sheet.getRange(cell);
       range.values = [[text]];
+      range.format.font.color = "black";
       range.format.autofitColumns();
       return context.sync();
     });
