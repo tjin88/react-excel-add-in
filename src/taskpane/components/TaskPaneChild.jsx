@@ -35,7 +35,6 @@ const TaskPane = () => {
 
   const callTextboxGPT = async () => {
     try {
-      let rangeAddress;
       let assistantResponse;
 
       await Excel.run(async (context) => {
@@ -43,18 +42,18 @@ const TaskPane = () => {
         range.load(["address", "values"]);
         await context.sync();
 
-        rangeAddress = range.address;
+        document.getElementById("message").innerText += `Calling GPT with prompt: ${prompt}.\n`;
 
-        console.log("Calling GPT with prompt: " + prompt);
         const updatedMessages = [...messages, { role: "user", content: prompt }];
         const res = await axios.post("https://localhost:3001/gpt-api", {
-          messages: updatedMessages,
+          // messages: updatedMessages,
+          prompt: prompt,
         });
-        assistantResponse = res.data.choices[0].message.content;
+        assistantResponse = res.data.text;
 
         const sheet = context.workbook.worksheets.getActiveWorksheet();
         sheet.protection.unprotect();
-        const rangeToUpdate = sheet.getRange(rangeAddress).getCell(0, 0).getOffsetRange(0, 1);
+        const rangeToUpdate = sheet.getRange(range.address).getCell(0, 0).getOffsetRange(0, 1);
         rangeToUpdate.values = [[assistantResponse]];
         rangeToUpdate.format.font.color = "black";
         rangeToUpdate.format.autofitColumns();
@@ -82,12 +81,15 @@ const TaskPane = () => {
 
         const prompt = range.values[0][0];
 
-        console.log("Calling GPT with prompt: " + prompt);
+        document.getElementById("message").innerText += `Calling GPT with prompt: ${prompt}.\n`;
+
         const updatedMessages = [...messages, { role: "user", content: prompt }];
         const res = await axios.post("https://localhost:3001/gpt-api", {
-          messages: updatedMessages,
+          // messages: updatedMessages,
+          prompt: prompt,
         });
-        assistantResponse = res.data.choices[0].message.content;
+        // assistantResponse = res.data.choices[0].message.content;
+        assistantResponse = res.data.text;
 
         const sheet = context.workbook.worksheets.getActiveWorksheet();
         sheet.protection.unprotect();
