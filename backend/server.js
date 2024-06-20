@@ -46,6 +46,9 @@ async function callCustomAssistant(prompt) {
     // retrieve or create the assistant
     let assistants = await openai.beta.assistants.list();
     assistant = assistants.data.find(assistant => assistant.name == process.env.OPENAI_API_ASSISTANT_NAME);
+
+    // If there is no assistant, create one with the specified name and instructions
+    // And add the desired files to the vector store
     if (assistant == null) {
       assistant = await openai.beta.assistants.create({
         name: process.env.OPENAI_API_ASSISTANT_NAME,
@@ -54,45 +57,30 @@ async function callCustomAssistant(prompt) {
         tools: [{ type: "file_search" }],
       });
 
-      // TODO: The below (until the end of the if statement) doesn't work as expected
-      // The file search tool is not being added to the assistant
-      // More specifically, the vector store is not being updated with the files (uploadAndPoll not working)
+      const r_units = await openai.files.create({
+        file: fs.createReadStream("files/om_r_units.pdf"),
+        purpose: "assistants",
+      });
 
-      // const filePaths = ["files/om_r_units.pdf", "files/om_afg_units.pdf"];
-      // const fileStreams = filePaths
-      //   .map((filePath) => {
-      //     try {
-      //       const stream = fs.createReadStream(filePath);
-      //       stream.on("error", (err) => {
-      //         console.error(`Error reading file ${filePath}:`, err.message);
-      //       });
-      //       return stream;
-      //     } catch (error) {
-      //       console.error(`Error creating stream for ${filePath}:`, error.message);
-      //       return null;
-      //     }
-      //   })
-      //   .filter((stream) => stream !== null);
+      const afg_units = await openai.files.create({
+        file: fs.createReadStream("files/om_afg_units.pdf"),
+        purpose: "assistants",
+      });
 
-      // if (fileStreams.length === 0) {
-      //   console.error("No valid file streams available.");
-      //   return;
-      // }
+      // Create a vector store including our two files.
+      let vectorStore = await openai.beta.vectorStores.create({
+        name: "Offering Memorandums",
+        file_ids: [r_units.id, afg_units.id],
+      });
 
-      // // Create a vector store including our two files.
-      // let vectorStore = await openai.beta.vectorStores.create({
-      //   name: "Offering Memorandums",
-      //   file_ids: fileStreams,
-      // });
+      console.log("Created vector store:", vectorStore.id);
 
-      // console.log("Created vector store:", vectorStore.id);
-
-      // // Ensure files are passed correctly
+      // Ensure files are passed correctly
       // await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStore.id, fileStreams);
 
-      // await openai.beta.assistants.update(assistant.id, {
-      //   tool_resources: { file_search: { vector_store_ids: [vectorStore.id] } },
-      // });
+      await openai.beta.assistants.update(assistant.id, {
+        tool_resources: { file_search: { vector_store_ids: [vectorStore.id] } },
+      });
     }
 
     console.log("Using the following assistant:", assistant.id, assistant.name, assistant.model, assistant.tools);
